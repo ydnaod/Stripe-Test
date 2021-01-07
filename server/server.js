@@ -44,6 +44,44 @@ app.get('/checkout-session', async (req, res) => {
   res.send(session);
 });
 
+app.post('/create-customer', async (req, res) => {
+
+  const {name, email} = req.body;
+
+  const customer = await stripe.customers.create({
+    name: name,
+    email: email
+  });
+
+  res.send(customer);
+})
+
+app.post('/create-invoice', async (req, res) => {
+  const {name, email, feeType, campus, program, customerId} = req.body;
+
+  if(feeType === "kit"){
+    if(campus === "philadelphia"){
+      if(program === "esthetics"){
+        const invoiceItem = await stripe.invoiceItems.create({
+          price: 'price_1I6ysTFiXUfgP10wZba9s5YV',
+          customer: customerId
+        });
+
+        console.log(invoiceItem)
+        const invoice = await stripe.invoices.create({
+          customer: customerId,
+          collection_method: 'send_invoice',
+          days_until_due: 30
+        })
+
+        stripe.invoices.sendInvoice(invoice.id, function (err, invoice) {
+
+        });
+      }
+    }
+  }
+})
+
 app.post('/create-checkout-session', async (req, res) => {
   const domainURL = process.env.DOMAIN;
 

@@ -133,7 +133,7 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
         const body = {
-            name, email 
+            name, email, feeType, campus, program
         }
         try {
             const response = await fetch("/create-customer", {
@@ -143,7 +143,22 @@ const Checkout = () => {
             });
 
             const parseRes = await response.json();
-            console.log(parseRes);
+            const customerId = parseRes.id;
+            const invoiceBody = {
+              name, email, feeType, campus, program, customerId
+            }
+            try {
+              const invoiceResponse = await fetch("/create-invoice", {
+                method: "POST",
+                headers: { "Content-Type" : "application/json" } ,
+                body: JSON.stringify(invoiceBody)
+            });
+
+            const parseInvoiceRes = await parseInvoiceRes.json();
+            console.log(parseInvoiceRes);
+            } catch (error) {
+              console.error(error.message)
+            }
         } catch (error) {
             console.error(error.message);
         }
@@ -180,7 +195,6 @@ const Checkout = () => {
           </div>
 
           <button
-            role="link"
             onClick={handleSubmit}
             disabled={!state.stripe || state.loading}
           >
