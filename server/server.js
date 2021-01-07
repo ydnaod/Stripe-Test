@@ -78,6 +78,23 @@ app.post('/create-invoice', async (req, res) => {
 
         });
       }
+      if(program === "cosmetology"){
+        const invoiceItem = await stripe.invoiceItems.create({
+          price: 'price_1I6ysTFiXUfgP10w4XKefd21',
+          customer: customerId
+        });
+
+        console.log(invoiceItem)
+        const invoice = await stripe.invoices.create({
+          customer: customerId,
+          collection_method: 'send_invoice',
+          days_until_due: 30
+        })
+
+        stripe.invoices.sendInvoice(invoice.id, function (err, invoice) {
+
+        });
+      }
     }
   }
 })
