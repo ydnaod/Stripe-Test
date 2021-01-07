@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 
 const fetchCheckoutSession = async ({ quantity }) => {
@@ -116,6 +116,39 @@ const Checkout = () => {
     }
   };
 
+  const [inputs, setInputs] = useState({
+    name: '',
+    email: '',
+    feeType: '',
+    campus: '',
+    program: ''
+  })
+
+  const { name, email, feeType, campus, program } = inputs;
+
+  const handleChange = (e) => {
+    setInputs({...inputs, [e.target.name]: e.target.value});
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+        const body = {
+            name, email 
+        }
+        try {
+            const response = await fetch("/create-customer", {
+                method: "POST",
+                headers: { "Content-Type" : "application/json" } ,
+                body: JSON.stringify(body)
+            });
+
+            const parseRes = await response.json();
+            console.log(parseRes);
+        } catch (error) {
+            console.error(error.message);
+        }
+  }
+
   return (
     <div className="sr-root">
       <div className="sr-main">
@@ -123,52 +156,37 @@ const Checkout = () => {
           <div className="sr-header__logo"></div>
         </header>
         <section className="container">
+
           <div>
-            <h1>Single photo</h1>
-            <h4>Purchase a Pasha original photo</h4>
-            <div className="pasha-image">
-              <img
-                alt="Random asset from Picsum"
-                src="https://picsum.photos/280/320?random=4"
-                width="140"
-                height="160"
-              />
-            </div>
+            <form onSubmit={handleSubmit}>
+              <input type="name" placeholder="name" name="name" value={name} onChange={handleChange}></input>
+              <input type="email" placeholder="email" name="email" value={email} onChange={handleChange}></input>
+              <select name="feeType" value={feeType} onChange={handleChange}>
+                <option value="registration">Registration Fee</option>
+                <option value="kit">Kit Fee</option>
+              </select>
+              <select name="campus" value={campus} onChange={handleChange}>
+                <option value="allentown">Allentown</option>
+                <option value="ambler">Ambler</option>
+                <option value="philadelphia">Philadelphia</option>
+                <option value="stroudsburg">Stroudsburg</option>
+              </select>
+              <select name="program" value={program} onChange={handleChange}>
+                <option value="cosmetology">Cosmetology</option>
+                <option value="esthetics">Esthetics</option>
+                <option value="teacher">Teacher</option>
+              </select>
+            </form>
           </div>
-          <div className="quantity-setter">
-            <button
-              className="increment-btn"
-              disabled={state.quantity === 1}
-              onClick={() => dispatch({ type: 'decrement' })}
-            >
-              -
-            </button>
-            <input
-              type="number"
-              id="quantity-input"
-              min="1"
-              max="10"
-              value={state.quantity}
-              readOnly
-            />
-            <button
-              className="increment-btn"
-              disabled={state.quantity === 10}
-              onClick={() => dispatch({ type: 'increment' })}
-            >
-              +
-            </button>
-          </div>
-          <p className="sr-legal-text">Number of copies (max 10)</p>
 
           <button
             role="link"
-            onClick={handleClick}
+            onClick={handleSubmit}
             disabled={!state.stripe || state.loading}
           >
             {state.loading || !state.price
               ? `Loading...`
-              : `Buy for ${state.price}`}
+              : `Submit`}
           </button>
           <div className="sr-field-error">{state.error?.message}</div>
         </section>
